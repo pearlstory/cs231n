@@ -1,0 +1,161 @@
+\documentclass[12pt]{article}%
+\usepackage{amsfonts}
+\usepackage{fancyhdr}
+\usepackage{comment}
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.2cm, right=2.2cm]%
+{geometry}
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage{changepage}
+\usepackage{amssymb}
+\usepackage{graphicx}%
+\setcounter{MaxMatrixCols}{30}
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\begin{document}
+
+\title{CS280 Fall 2018 Assignment 1 \\ Part A}
+\author{ML Background}
+\date{Due in class, October 12, 2018}
+\maketitle
+
+\paragraph{Name: Ke Zhang}
+
+\paragraph{Student ID: 50369264 }
+
+\newpage
+
+
+\subsubsection*{1. MLE (5 points)}
+Given a dataset $\mathcal{D} = \{x_1,\cdots, x_n\}$. Let $p_{emp}(x)$ be the empirical distribution, i.e., $p_{emp}(x)=\frac{1}{n}\sum_{i=1}^n\delta(x,x_i) $ and let $q(x|\theta)$ be some model.  
+\begin{itemize}
+	\item Show that $\arg\min_q KL(p_{emp}||q)$ is obtained by $q(x)=q(x;\hat{\theta})$, where $\hat{\theta}$ is the Maximum Likelihood Estimator and $KL(p||q)=\int p(x)(\log p(x)- \log q(x))dx$ is the KL divergence.
+\end{itemize}
+\textbf{Solution}\\
+The likelihood function and its $ log $ form are written as
+\begin{align*}
+L(x,\theta)&=\prod_{i=1}^{n}q(x_i;\theta)\\
+logL(x,\theta)&=\sum_{i=1}^{n}\log q(x_i;\theta)
+\end{align*}
+So the likelihood estimator $ \hat{\theta} $ is solved so that $ \sum_{i=1}^{n}\log(q(x_i;\theta)) $ is maximized, that is, $ \hat{\theta} $ is the parameter that could make the model $ q(x|\hat{\theta}) $ generate the dataset $ \mathcal{D} $ most likely.\\
+\begin{align*}
+\min_q KL(p_{emp}||q)&=\min_q \Big(\int p(x)\log p(x)dx- \int p(x)\log q(x)dx\Big)\\
+&\Rightarrow\max_q\int \sum_{i=1}^n\delta(x,x_i)\log q(x)dx\\
+&=\max_q\sum_{i=1}^n\int\delta(x,x_i)\log q(x)dx\\
+&=\max_q\sum_{i=1}^{n}\log q(x_i,\theta)
+\end{align*}
+Therefore, $ KL(p_{emp}||q) $ could be minimized by choosing $ \theta=\hat{\theta} $ in $ q(x,\theta) $.
+
+
+
+
+\newpage
+
+\newpage
+
+
+\subsubsection*{2. Properties of $l_2$ regularized logistic regression (10 points)}
+Consider minimizing
+\[
+J(\mathbf{w}) = -\frac{1}{|D|}\sum_{i\in D} \log \sigma(y_i\mathbf{x}_i^T\mathbf{w})+\lambda\|\mathbf{w}\|_2^2
+\]
+where $y_i\in {-1,+1}$. Answer the following true/false questions and \textbf{explain why}.
+\begin{itemize}
+\item $J(\mathbf{w})$ has multiple locally optimal solutions: T/F?
+\item Let $\hat{\mathbf{w}}=\arg\min_{\mathbf{w}}J(\mathbf{w})$ be a global optimum. $\hat{\mathbf{w}}$ is sparse (has many zeros entries): T/F?
+\end{itemize}
+\textbf{Solution}
+\begin{itemize}
+	\item False. In the loss function $ J(\textbf{w}) $, both two terms are convex, so the function is convex and its optmial solution is unique which is locally as well as globally.
+	\item False. Due to the mathematical formula of $ l_2 $, to minimize the loss function as well as constrain $ \hat{\mathbf{w}} $, the term $ \lambda\|\mathbf{w}\|_2^2 $ could only make some cofficients as small as possible but can't eliminite them, so $ \hat{\mathbf{w}} $ cannot be sparse like $ l_1 $ norm does. 
+\end{itemize}
+
+\newpage
+
+
+%\subsubsection*{3. Gaussian Distributions (10 points)}
+%Let $X\sim N(0,1)$ and $Y=WX$, where $p(W=-1)=p(W=1)=0.5$. It is clear that $X$ and $Y$ are not independent since $Y$ is a function of $X$. 
+%\begin{itemize}
+%	\item Show $Y\sim N(0,1)$
+%	\item Show $cov[X,Y]=0$. hint: $cov[X,Y]=E[XY]-E[X]E[Y]$ and $E[XY]=E[E[XY|W]]$
+%\end{itemize}
+%Therefore, $X$ and $Y$ are uncorrelated and Gaussian, but they are dependent. Why?
+\subsubsection*{3. Gradient descent for fitting GMM (15 points)}
+Consider the Gaussian mixture model
+\[p(\mathbf{x}|\theta)=\sum_{k=1}^{K} \pi_{k} \mathcal{N}(\mathbf{x}|\mu_k,\Sigma_k)\]
+Define the log likelihood as
+\[ l(\theta) = \sum_{n=1}^N \log p(\mathbf{x}_n|\theta)
+\]
+Denote the posterior responsibility that cluster $k$ has for datapoint $n$ as follows:
+\[
+r_{nk}:=p(z_n=k|\mathbf{x}_n,\theta) = \frac{\pi_k\mathcal{N}(\mathbf{x}_n|\mu_k,\Sigma_k)}{\sum_{k'}\pi_{k'}\mathcal{N}(\mathbf{x}_n|\mu_{k'},\Sigma_{k'})}
+\]
+ 
+\begin{itemize}
+	
+	\item Show that the gradient of the log-likelihood wrt $\mu_k$ is
+	\[ \frac{d}{d\mu_k}l(\theta) = \sum_n r_{nk}\Sigma_k^{-1}(\mathbf{x}_n-\mu_k)
+	\]
+    \item Derive the gradient of the log-likelihood wrt $\pi_k$ without considering any constraint on $\pi_k$. (bonus: with constraint $\sum_k\pi_k=1$.)
+    \item Derive the gradient of the log-likelihood wrt $\Sigma_k$ without considering any constraint on $\Sigma_k$. (bonus: with constraint $\Sigma_k$ be a symmetric positive definite matrix.) 
+	
+\end{itemize}
+\textbf{Solution}
+\begin{itemize}
+	\item 
+	\begin{align*}
+	l(\theta)=&\sum_{n=1}^N \log p(\mathbf{x}_n|\theta)\\
+	=&\sum_{n=1}^N\log \Big( \sum_{k=1}^{K} \pi_{k} \mathcal{N}(\mathbf{x}|\mu_k,\Sigma_k)\Big)\\
+	=&\sum_{n=1}^N\log \Big( \sum_{k=1}^{K} r_{nk}\dfrac{\pi_{k} \mathcal{N}(\mathbf{x}|\mu_k,\Sigma_k)}{r_{nk}}\Big)\\
+	\ge&\sum_{n=1}^N\sum_{k=1}^Kr_{nk}\log\dfrac{\pi_{k} \mathcal{N}(\mathbf{x}|\mu_k,\Sigma_k)}{r_{nk}}\\
+	=&\sum_{n=1}^N\sum_{k=1}^K r_{nk}\Big[\log\pi_k-\dfrac{1}{2}\log(2\pi|\Sigma_k|)-\dfrac{1}{2}(\mathbf{x}_n-\mu_k)^T\Sigma_k^{-1}(\mathbf{x}_n-\mu_k)\Big] \tag{1}
+	\end{align*}
+	the last line above is derived by Jason's inequality $ \log(E(X))\ge E(\log X) $. To obtain the gradient w.r.t.$ \mu_k $, we only need to solve the lower bound of $ l(\theta) $, therefore
+	\begin{align*}
+	\dfrac{d}{d\mu_k}l(\theta)=\sum_{n=1}^Nr_{nk}\Sigma_k^{-1}(\mathbf{x}_n-\mu_k)
+	\end{align*} 
+	\item Compute the gradient w.r.t $ \Sigma_k $  of the function (1):
+	\[ \dfrac{d}{d\pi_k}l(\theta)=\sum_{n=1}^N\dfrac{r_{nk}}{\pi_k} \]
+	If we have the constriant condition $ \sum_{k=1}\pi_k=1 $, denote the Lagrange function be $ \mathcal L(\theta)=l(\theta)+\lambda(\sum_{k=1}\pi_k-1) $ where $ \lambda $ is a dual variable., the derivation is very close to the result in question (1) except that the extra term $ \lambda(\sum_{k=1}\pi_k-1) $ is added, hence
+	\begin{align*}
+	\dfrac{d}{d\pi_k}\mathcal{L}(\theta)&=\sum_{n=1}^N\dfrac{r_{nk}}{\pi_k}+\lambda\tag{2}\\
+	\dfrac{d}{d\lambda}\mathcal{L}(\theta)&=\sum_{k=1}^K\pi_k-1\tag{3}
+	\end{align*}
+	Let equation (2) and (3) equal to 0, then $ \pi_k $ could be solved.
+	\item Take gradient w.r.t $ \Sigma_k $ in (1):
+	\begin{align*}
+	\dfrac{d}{d\Sigma_k}l(\theta)&=\sum_{n=1}^Nr_{nk}\Big(-\dfrac{1}{2}\Sigma_k^{-1}+\dfrac{1}{2}\dfrac{(\mathbf{x}_n-\mu_k)^T(\mathbf{x}_n-\mu_k)}{\Sigma_k^{2}}\Big)
+	\end{align*}
+	If $ \Sigma_k $ is considered as symmetric PD matrix, i.e., $ \Sigma_k\succ\mathbf{0} $, set the Lagrange function $ \mathcal{L}(\theta)=l(\theta)+\text{Tr}(\Sigma_k\mathbf{\Lambda}) $ where $ \mathbf{\Lambda} $ is a dual variable.
+	\begin{align*}
+	\dfrac{d}{d\Sigma_k}l(\theta)&=\sum_{n=1}^Nr_{nk}\Big(-\dfrac{1}{2}\Sigma_k^{-1}+\dfrac{1}{2}\dfrac{(\mathbf{x}_n-\mu_k)^T(\mathbf{x}_n-\mu_k)}{\Sigma_k^{2}}\Big)+\mathbf{\Lambda}
+	\end{align*}
+\end{itemize}
+
+\end{document}
