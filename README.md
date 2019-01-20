@@ -1,2 +1,2 @@
 # cs231n
-computer vision course
+computer vision course of https://cs231n.github.io/
