@@ -1,0 +1,166 @@
+\documentclass[12pt]{article}%
+\usepackage{amsfonts}
+\usepackage{fancyhdr}
+\usepackage{comment}
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.2cm, right=2.2cm]%
+{geometry}
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage{changepage}
+\usepackage{amssymb}
+\usepackage{graphicx}%
+\usepackage{bm}
+\setcounter{MaxMatrixCols}{30}
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\begin{document}
+
+\title{CS280 Fall 2018 Assignment 2 \\ Part A}
+\author{CNNs}
+\date{Due in class, Nov 02, 2018}
+\maketitle
+
+\paragraph{Name: Ke Zhang}
+
+\paragraph{Student ID: 50369264}
+
+\newpage
+
+\section*{1. Linear Regression(10 points)}
+\begin{itemize}
+	\item Linear regression has the form $E[y\lvert x] = w_{0} + \bm{w^{T}}x$. It is possible to solve for $\bm{w}$ and $w_{0}$ seperately. Show that
+	\begin{equation*}
+	w_{0} = \frac{1}{n}\sum_{i}y_{i} - \frac{1}{n}\sum_{i}x_{i}^{T}\bm{w} = \overline{y} - \overline{x}^{T}\bm{w} 
+	\end{equation*}
+	
+	\item Show how to cast the problem of linear regression with respect to the absolute value loss function, $l(h,x,y)=\lvert h(x) - y \rvert$, as a linear program.
+\end{itemize}
+
+\textbf{Solution}
+\begin{itemize}
+	\item The linear regression equation can be rewritten as 
+	\[ y=w_0+\bm{w}^Tx+\epsilon \]
+	where $ \epsilon $ is an error singal with zero mean $ E(\epsilon)=0 $.
+	We have known that the estimator of these weights(i.e., the solution of maximum likelihood estimation) is solved from least square equation. Hence, to compute $ w_0 $:
+	\begin{align*}
+	l(w)&=\dfrac{1}{2n}\sum_{i}(y_i-(w_0+\bm{w}^Tx_i))^2\\
+	\dfrac{\partial L(w)}{\partial w_0}&=\dfrac{1}{n}\sum_{i}(y_i-(w_0+\bm{w}^Tx_i))\\
+	0&=\dfrac{1}{n}\sum_{i}(y_i-\bm{w}^Tx_i)-w_0\\
+	w_0&=\dfrac{1}{n}\sum_{i}(y_i-\bm{w}^Tx_i)\\
+	&=\bar{y}-\bar{x}^T\bm{w}
+	\end{align*}
+	\item If the loss function is set as $ l(w)=\dfrac{1}{n}\sum_{i}(y_i-h(x)) $ where $ h(x)=w_0+\bm{w}^Tx $, the derivate of $ w_0 $ is
+	\[ \dfrac{\partial l(w)}{\partial w_0}=-\dfrac{1}{n}\sum_{i}\text{sgn}(y_i-h(x_i)) \]
+	where\begin{align*}
+	\text{sgn}(y_i-h(x_i))=\begin{cases}
+	1&y_i>h(x_i)\\
+	-1&y_i<h(x_i)\\
+	[-1,1]&y_i=h(x_i)
+	\end{cases}
+	\end{align*}
+	so we can see that there is no explict estimator of optimal weight $ w_0 $ since $ l_1 $ norm is not smooth in each point, but the best weights could be computed interatively from the initial weights.
+\end{itemize}
+
+\section*{2. Convolution Layers (5 points)}
+We have a video sequence and we would like to design a 3D convolutional neural network to recognize events in the video. The frame size is 32x32 and each video has 30 frames. Let's consider the first convolutional layer.  
+\begin{itemize}
+	\item We use a set of $5\times 5\times 5$ convolutional kernels. Assume we have 64 kernels and apply stride 2 in spatial domain and 4 in temporal domain, what is the size of output feature map? Use proper padding if needed and clarify your notation.
+	\item We want to keep the resolution of the feature map and decide to use the dilated convolution. Assume we have one kernel only with size $7\times 7\times 5$ and apply a dilated convolution of rate $3$. What is the size of the output feature map? What are the downsampling and upsampling strides if you want to compute the same-sized feature map without using dilation?   
+\end{itemize}
+Note: You need to write down the derivation of your results.
+
+\textbf{Solution}
+\begin{itemize}
+	\item Because of the size of kernel, we need to extract 5 continuous frames once to make convolution with a kernel, so the number of featurers map is:
+	\[ ((30-5+3)/4+1)\times64=8\times64 \]
+	here the padding is 3.\\
+	The size of one feature map is:
+	\[ (32-5+1)/2+1=15 \]
+	 Since the kernel is $5\times 5\times 5$, padding in one frame is set as 1, thus the size of output feature map is $ 8\times64@ 15\times15 $.
+	 \item The dilated convolution could expand kernel's receptive field without changing the size of the feature map. Therefore, the output feature map is still $ 32\times32\times30 $.\\
+	 Given the kernel with size $7\times 7\times 5$, actual receptive field is $ 19\times19\times13 $($ (7-1)\times3+1 $ and $ (5-1)\times3+1 $), so in order to keep the size of one feature map still be $ 32\times32 $, padding $ p $ should equal to: $ p=\dfrac{19-1}{2} =8$
+	 
+	 Without dilation, according to the kernel cascading fomula, the receptive field:
+	 \[ r_n=r_{n-1}\cdot k_{n-1}-(r_{n-1}-\prod_{i=0}^{n-1}S_{i})\cdot(k_n-1) \]
+	 where $ r_{n-1} $ is the size of receptive field and $ k_{n-1} $ is the kernel size using at $ n-1_{th} $ cascade kernel. We assume that $ r_0=1 $ and $ S_0=1 $ at the original output layer.\\
+	 According this rule, to keep the size of receptive field still be $ 19\times19\times13 $, suppose we need three cascading kernels with all size $ 7\times7 $(here we first consider only kernel's the height and width), then we have:
+	 \[ r_0=1  \]
+	 \[ r_1=r_0+(k_n-1)S_0 \]
+	 \[ r_2=r_1+(k_n-1)S_1\]
+	 \[ r_3=r_2+(k_n-1)S_2S_1  \]
+	 then when we use \textbf{two} cascading kernel with all stride $ S=2 $, for height and width: $ r_2=7+6\times2=19 $, for spatial size: $ r_2=5+4\times2=13 $;\\
+	 or use \textbf{three } cascading kernel with all stride $ S=1 $, for height and width: $ r_3=7+6+6\times1=19 $, for spatial size: $ r_3=5+4+4\times1=13 $.\\
+	 And we can see that such cascading method could be used in both downsampling adn upsampling without changing the resolution feature map, hence, strides could be 2 or 1.
+\end{itemize}
+\newpage
+
+\section*{3. Batch Normalization (5 points)}
+With Batch Normalization (BN), show that backpropagation through a layer is unaffected by the scale of its parameters. 
+\begin{itemize}
+	\item Show that \[BN(\mathbf{Wu})=BN((a\mathbf{W})\mathbf{u})\] where $\mathbf{u}$ is the input vector and $\mathbf{W}$ is the weight matrix, $a$ is a scalar. 
+	\item (Bonus: 5 pts) Show that 
+	\[\frac{\partial BN((a\mathbf{W})\mathbf{u})}{\partial \mathbf{u}}=\frac{\partial BN(\mathbf{W}\mathbf{u})}{\partial \mathbf{u}}\]
+\end{itemize}
+\textbf{Solution}
+\begin{itemize}
+	\item \[ BN(\mathbf{Wu})=\dfrac{\mathbf{Wu}-E[\mathbf{Wu}]}{\sqrt{Var[\mathbf{Wu}]}} \]
+	\begin{align*}
+	BN((a\mathbf{W})\mathbf{u})&=\dfrac{(a\mathbf{W})\mathbf{u}-E[(a\mathbf{W})\mathbf{u}]}{\sqrt{Var[(a\mathbf{W})\mathbf{u}}]}\\
+	&=\dfrac{a\mathbf{Wu}-aE[\mathbf{Wu}]}{\sqrt{E[(a\mathbf{Wu})^2-(E[a\mathbf{Wu}])^2]}}\\
+	&=\dfrac{a\mathbf{Wu}-aE[\mathbf{Wu}]}{\sqrt{a^2E[(\mathbf{Wu})^2-a^2(E[\mathbf{Wu}])^2]}}\\
+	&=\dfrac{\mathbf{Wu}-E[\mathbf{Wu}]}{\sqrt{Var[\mathbf{Wu}]}}\\
+	&=BN(\mathbf{Wu})
+	\end{align*}
+	\item Denote $ \mathbf{Wu}=\mathbf{x} $, according to the definition, we have
+	\[ E(\mathbf{x})=\dfrac{1}{N}\sum_{i=1}^{N}x_i \]
+	\[ Var(\mathbf{x})=\dfrac{1}{N}\sum_{i=1}^{N}(x_i-E(\mathbf{x}))^2 \]
+	where $ x_i $ is the $ i_{th} $ output point.
+	\begin{align*}
+	\dfrac{\partial BN(\mathbf{x})}{\partial u_i}&=\dfrac{\partial BN(\mathbf{x})}{\partial x_i}\mathbf{W}_i\\
+	&=\dfrac{(1-\dfrac{1}{N})\sqrt{Var(x_i)} - (x_i-\dfrac{1}{N}\sum\limits_{k=1}^{N}x_k)\dfrac{1}{2\sqrt{Var(x_i)}}\dfrac{2}{N}\sum\limits_{k=1}^{N}(x_k-E(\mathbf{x}))(-\dfrac{1}{N})}{Var(x_i)}\mathbf{W}_i\\
+	&=\dfrac{(1-\dfrac{1}{N})\sqrt{Var(x_i)} + (x_i-\dfrac{1}{N}\sum\limits_{k=1}^{N}x_k)\dfrac{1}{N^2\sqrt{Var(x_i)}}\sum\limits_{k=1}^{N}(x_k-E(\mathbf{x}))}{Var(x_i)}\mathbf{W}_i
+	\end{align*}
+	and
+	\begin{align*}
+	\dfrac{\partial BN(a\mathbf{x})}{\partial u_i}&=\dfrac{\partial BN(a\mathbf{x})}{\partial x_i}\mathbf{W}_i\\
+	&=\dfrac{a(1-\dfrac{1}{N})a\sqrt{Var(x_i)} - a(x_i-\dfrac{1}{N}\sum\limits_{k=1}^{N}x_k)\dfrac{1}{2a\sqrt{Var(x_i)}}\dfrac{2}{N}\sum\limits_{k=1}^{N}a(x_k-E(\mathbf{x}))(-\dfrac{a}{N})}{a^2Var(x_i)}\mathbf{W}_i\\
+	&=\dfrac{(1-\dfrac{1}{N})\sqrt{Var(x_i)} + (x_i-\dfrac{1}{N}\sum\limits_{k=1}^{N}x_k)\dfrac{1}{N^2\sqrt{Var(x_i)}}\sum\limits_{k=1}^{N}(x_k-E(\mathbf{x}))}{Var(x_i)}\mathbf{W}_i\\
+	&=\dfrac{\partial BN(\mathbf{x})}{\partial u_i}
+	\end{align*}
+	therefore, $ \dfrac{\partial BN(a\mathbf{x})}{\partial \mathbf{u}}=\dfrac{\partial BN(\mathbf{x})}{\partial\mathbf{u}} $.
+\end{itemize}
+\newpage
+
+
+
+\newpage
+
+
+
+\end{document}
